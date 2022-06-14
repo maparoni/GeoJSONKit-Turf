@@ -11,7 +11,7 @@ import GeoJSONKit
 
 // Adopted from https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 struct AndrewsMonotoneChain {
-  private static func cross(_ o: GeoJSON.Position, _ a: GeoJSON.Position, _ b: GeoJSON.Position) -> CGFloat {
+  private static func cross(_ o: GeoJSON.Position, _ a: GeoJSON.Position, _ b: GeoJSON.Position) -> Double {
     let lhs = (a.x - o.x) * (b.y - o.y)
     let rhs = (a.y - o.y) * (b.x - o.x)
     return lhs - rhs
