@@ -135,7 +135,7 @@ extension GeoJSON.Geometry {
     case .lineString(let line): return line.positions
     case .polygon(let polygon):
       // Ignore the interior positions as the purpose of this is getting
-      // bounding boxes or alike
+      // bounding boxes, convex hull or alike
       return polygon.exterior.positions
     }
   }
