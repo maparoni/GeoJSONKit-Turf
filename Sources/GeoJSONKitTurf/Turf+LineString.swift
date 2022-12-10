@@ -221,13 +221,17 @@ extension GeoJSON.LineString {
     }
     
     return (0..<segmentCount)
-      .flatMap { i in
+      .flatMap { i -> [GeoJSON.Position] in
         let trimmed = Self.trimmed(
           positions,
           from: length * Double(i),
           to: length * Double(i + 1)
         )
-        return trimmed.dropFirst(i == 0 ? 0 : 1)
+        if i == 0 {
+          return trimmed
+        } else {
+          return Array(trimmed.dropFirst())
+        }
       }
   }
   
