@@ -56,6 +56,7 @@ Turf.js | GeoJSONKit-Turf
 [turf-helpers#radiansToDegrees](https://github.com/Turfjs/turf/tree/master/packages/turf-helpers/#radiansToDegrees) | `GeoJSON.DegreesRadians.toDegrees()`
 [turf-helpers#convertLength](https://github.com/Turfjs/turf/tree/master/packages/turf-helpers#convertlength)<br/>[turf-helpers#convertArea](https://github.com/Turfjs/turf/tree/master/packages/turf-helpers#convertarea) | `Measurement.converted(to:)`
 [turf-length](https://github.com/Turfjs/turf/tree/master/packages/turf-length/) | `GeoJSON.LineString.distance(from:to:)`
+[turf-line-chunk](http://turfjs.org/docs/#lineChunk) | `GeoJSON.LineString.chunked(length:)`<br/>`GeoJSON.Polygon.LinearRing.chunked(length:)` |
 [turf-line-intersect](https://github.com/Turfjs/turf/tree/master/packages/turf-line-intersect/) | `GeoJSON.LineString.intersection(with:)`
 [turf-line-slice](https://github.com/Turfjs/turf/tree/master/packages/turf-line-slice/) | `GeoJSON.LineString.sliced(from:to:)`
 [turf-line-slice-along](https://github.com/Turfjs/turf/tree/master/packages/turf-line-slice-along/) | `GeoJSON.LineString.trimmed(from:distance:)`<br/>`GeoJSON.LineString.trimmed(from:to:)` 

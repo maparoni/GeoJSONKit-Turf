@@ -17,4 +17,9 @@ extension GeoJSON.Position {
     return dx * dx + dy * dy
   }
   
+  static func length(of positions: [GeoJSON.Position]) -> GeoJSON.Distance {
+    let pairs = zip(positions.prefix(upTo: positions.count - 1), positions.suffix(from: 1))
+    return pairs.map { $0.distance(to: $1) }.reduce(0, +)
+  }
+  
 }

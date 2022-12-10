@@ -7,6 +7,10 @@ import GeoJSONKit
  */
 extension GeoJSON.Polygon.LinearRing {
   
+  public var circumference: GeoJSON.Distance {
+    GeoJSON.Position.length(of: positions)
+  }
+  
   /**
    * Calculate the approximate area of the polygon were it projected onto the earth, in square meters.
    * Note that this area will be positive if ring is oriented clockwise, otherwise it will be negative.
@@ -123,6 +127,12 @@ extension GeoJSON.Polygon.LinearRing {
   
   func closestPosition(to coordinate: GeoJSON.Position) -> GeoJSON.Position? {
     GeoJSON.LineString.IndexedCoordinate.findClosest(to: coordinate, on: positions)?.coordinate
+  }
+  
+  /// Divides a ``GeoJSON.Polygon.LinearRing`` into chunks of a specified length.
+  /// If the line is shorter than the segment length then the original line is returned.
+  public func chunked(length: GeoJSON.Distance) -> GeoJSON.Polygon.LinearRing {
+    return .init(positions: GeoJSON.LineString.sliceLineSegments(positions, length: length))
   }
 
 }
