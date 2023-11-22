@@ -16,30 +16,16 @@ class PolygonWorkerTests: XCTestCase {
     let data = try Fixture.loadData(folder: "simplify/in", filename: "countries-coastline-1km", extension: "geojson")
     let geoJSON = try GeoJSON(data: data)
     let worker = GeoJSONSimplifier()
-    await worker.simplify(geoJSON)
-    XCTAssertTrue(worker.isLoaded)
+    let simplified = await worker.simplify(geoJSON)
+    XCTAssertEqual(simplified.count, 248)
   }
 }
 
 class GeoJSONSimplifier {
-  private let polygonLock = NSLock()
-  private var polygons: [GeoJSON.Feature] = []
-  var isLoaded: Bool = false
-  
-  private let workerQueue: OperationQueue = {
-    let queue = OperationQueue()
-    queue.name = "app.maparoni.GeoJSONKitTurf.Simplifier"
-    queue.qualityOfService = .utility
-#if !os(Linux)
-    queue.maxConcurrentOperationCount = ProcessInfo().activeProcessorCount
-#endif
-    return queue
-  }()
-  
   init() { }
   
-  func simplify(_ geoJSON: GeoJSON) async {
-    guard case .featureCollection(let features) = geoJSON.object else { return }
+  func simplify(_ geoJSON: GeoJSON) async -> [GeoJSON.Feature] {
+    guard case .featureCollection(let features) = geoJSON.object else { return [] }
 
     let polygonFeatures = features
       .compactMap { feature -> GeoJSON.Feature? in
@@ -49,31 +35,20 @@ class GeoJSONSimplifier {
         updated.polygons = polygons // this gets rid off geometry collections
         return updated
       }
+    guard !polygonFeatures.isEmpty else { return [] }
     
-    self.polygons = []
-    return await withCheckedContinuation { continuation in
-      workerQueue.addBarrierBlock {
-        self.workerQueue.progress.completedUnitCount = 0
-        self.workerQueue.progress.totalUnitCount = Int64(polygonFeatures.count)
-        guard !polygonFeatures.isEmpty else {
-          self.isLoaded = true
-          return
-        }
-        
-        polygonFeatures.forEach { feature in
-          self.workerQueue.addOperation {
+    return await withTaskGroup(of: GeoJSON.Feature.self) { group in
+      for feature in polygonFeatures {
+        group.addTask {
+          await Task(priority: .utility) {
             var updated = feature
             updated.polygons = feature.polygons.map { $0.simplified(options: .init(algorithm: .RamerDouglasPeucker(tolerance: 0.001), highestQuality: false)) }
-            self.polygonLock.lock(); defer { self.polygonLock.unlock() }
-            self.polygons.append(updated)
-          }
-        }
-        
-        self.workerQueue.addBarrierBlock {
-          self.isLoaded = true
-          continuation.resume(returning: ())
+            return updated
+          }.value
         }
       }
+      
+      return await group.reduce(into: []) { $0.append($1) }
     }
   }
 }
