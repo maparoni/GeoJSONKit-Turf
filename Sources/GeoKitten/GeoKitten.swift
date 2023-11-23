@@ -14,6 +14,7 @@ import ArgumentParser
 import GeoJSONKit
 import GeoJSONKitTurf
 
+@main
 struct GeoKitten: ParsableCommand {
   static var configuration = CommandConfiguration(
     commandName: "geokitten",
@@ -31,7 +32,7 @@ struct Simplify: ParsableCommand {
   @Option(name: .shortAndLong, help: "Enable high quality, skipping radial simplification")
   var highQuality: Bool = false
 
-  func run() throws {
+  mutating func run() throws {
     let inputPath = URL(fileURLWithPath: input)
     let inputData = try Data(contentsOf: inputPath)
     let input = try GeoJSON(data: inputData)
@@ -40,7 +41,5 @@ struct Simplify: ParsableCommand {
     print(String(decoding: output, as: UTF8.self))
   }
 }
-
-GeoKitten.main()
 
 #endif
