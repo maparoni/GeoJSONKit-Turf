@@ -16,7 +16,7 @@ extension Collection where Element == GeoJSON.Position {
   ///
   /// - Returns: The convex hull of this sequence as a polygon
   public func convexHull() -> GeoJSON.Polygon {
-    let positions = AndrewsMonotoneChain.convexHull(self).map { $0.removingAltitude }
+    let positions = AndrewsMonotoneChain.convexHull(self).map(\.removingAltitude)
     return .init(exterior: .init(positions: positions))
   }
 }

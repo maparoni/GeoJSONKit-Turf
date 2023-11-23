@@ -40,13 +40,28 @@ struct AndrewsMonotoneChain {
     var lower = [GeoJSON.Position]()
     var upper = [GeoJSON.Position]()
     
+    let boundingBox = GeoJSON.BoundingBox(positions: Array(points), allowSpanningAntimeridian: true)
+    let normalized: [GeoJSON.Position]
+    let didNormalize: Bool
+    if boundingBox.spansAntimeridian {
+      normalized = points.map {
+        var position = $0
+        position.longitude = position.longitude.wrap(min: 0, max: 360)
+        return position
+      }
+      didNormalize = true
+    } else {
+      normalized = Array(points)
+      didNormalize = false
+    }
+    
     // Sort points in lexicographical order.
-    let points = points.sorted { a, b in
+    let sorted = normalized.sorted { a, b in
       a.x < b.x || a.x == b.x && a.y < b.y
     }
     
     // Construct the lower hull.
-    for point in points {
+    for point in sorted {
       while lower.count >= 2 {
         let a = lower[lower.count - 2]
         let b = lower[lower.count - 1]
@@ -57,7 +72,7 @@ struct AndrewsMonotoneChain {
     }
     
     // Construct the upper hull.
-    for point in points.lazy.reversed() {
+    for point in sorted.lazy.reversed() {
       while upper.count >= 2 {
         let a = upper[upper.count - 2]
         let b = upper[upper.count - 1]
@@ -73,7 +88,12 @@ struct AndrewsMonotoneChain {
     upper.removeLast()
     
     // Join the arrays to form the convex hull.
-    return lower + upper
+    let joined = lower + upper
+    if didNormalize {
+      return joined.map(\.normalized)
+    } else {
+      return joined
+    }
   }
 }
 
