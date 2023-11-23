@@ -11,10 +11,10 @@ extension GeoJSON.Polygon {
    - Parameter center: The center coordinate for the polygon.
    - Parameter radius: The radius of the polygon, measured in meters.
    - Parameter vertices: The number of vertices the polygon will have.
-   The recommended amount is 64.
+   The recommended and default amount is 64.
    - Returns: A polygon shape which approximates a circle.
    */
-  public init(center: GeoJSON.Position, radius: GeoJSON.Distance, vertices: Int) {
+  public init(center: GeoJSON.Position, radius: GeoJSON.Distance, vertices: Int = 64) {
     // The first and last coordinates in a polygon must be identical,
     // which is why we're using the inclusive range operator in this case.
     // Ported from https://github.com/Turfjs/turf/blob/17002ccd57e04e84ddb38d7e3ac8ede35b019c58/packages/turf-circle/index.ts
