@@ -49,10 +49,7 @@ class PositionTests: XCTestCase {
       if actual != expectedPolygon {
         // Give it another chance on the data-level, too
         do {
-          var options: JSONSerialization.WritingOptions = [.prettyPrinted]
-          if #available(iOS 11.0, OSX 10.13, *) {
-            options.insert(.sortedKeys)
-          }
+          let options: JSONSerialization.WritingOptions = [.sortedKeys]
           let newData = try GeoJSON(geometry: .single(.polygon(actual))).toData(options: options)
           let oldData = try GeoJSON(geometry: .single(.polygon(expectedPolygon))).toData(options: options)
           if newData != oldData {
