@@ -33,6 +33,10 @@ extension GeoJSON.LineString {
     return GeoJSON.LineString(positions: coords)
   }
   
+  public func clipped(to boundingBox: GeoJSON.BoundingBox) -> GeoJSON.LineString {
+    return .init(positions: SutherlandHodgeman.clip(positions, to: boundingBox, close: false))
+  }
+  
   /**
    Returns the portion of the line string that begins at the given start distance and extends the given stop distance along the line string.
    
@@ -295,7 +299,7 @@ extension GeoJSON.LineString {
     return []
   }
   
-  // MARK: - Fretched Distance
+  // MARK: - Fretchet Distance
 
   /// Frechet distance to another line, which is a measure of how similar the the lines are
   ///

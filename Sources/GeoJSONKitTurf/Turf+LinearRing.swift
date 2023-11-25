@@ -136,5 +136,9 @@ extension GeoJSON.Polygon.LinearRing {
   public func chunked(length: GeoJSON.Distance) -> GeoJSON.Polygon.LinearRing {
     return .init(positions: GeoJSON.LineString.sliceLineSegments(positions, length: length))
   }
+  
+  public func clipped(to boundingBox: GeoJSON.BoundingBox) -> GeoJSON.Polygon.LinearRing {
+    return .init(positions: SutherlandHodgeman.clip(positions, to: boundingBox, close: true))
+  }
 
 }

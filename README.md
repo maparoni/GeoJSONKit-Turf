@@ -43,7 +43,7 @@ Turf.js | GeoJSONKit-Turf
 ----|----
 [turf-along](https://github.com/Turfjs/turf/tree/master/packages/turf-along/) | `GeoJSON.LineString.coordinateFromStart(distance:)`
 [turf-area](https://github.com/Turfjs/turf/blob/master/packages/turf-area/) | `GeoJSON.Polygon.area`
-[turf-bbox-clip](https://turfjs.org/docs/#bboxClip) | `GeoJSON.Polygon.clip(to:)`
+[turf-bbox-clip](https://turfjs.org/docs/#bboxClip) | `GeoJSON.LineString.clipped(to:)`<br/>`GeoJSON.Polygon.clipped(to:)`
 [turf-bearing](https://turfjs.org/docs/#bearing) | `GeoJSON.Position.direction(to:)`<br/> `RadianCoordinate2D.direction(to:)`
 [turf-bezier-spline](https://github.com/Turfjs/turf/tree/master/packages/turf-bezier-spline/) | `GeoJSON.LineString.bezier(resolution:sharpness:)`
 [turf-boolean-point-in-polygon](https://github.com/Turfjs/turf/tree/master/packages/turf-boolean-point-in-polygon) | `GeoJSON.Polygon.contains(_:)`
@@ -73,7 +73,8 @@ Additionally, it adds the following features, which do not have a direct equival
 
 * `GeoJSON.Direction.difference(from:)`
 * `GeoJSON.Direction.wrap(min:max:)`
-* `GeoJSON.LineString.frechetDistance(to:)`: Determines [Fréchet Distance](https://en.wikipedia.org/wiki/Fréchet_distance) between two line strings, which is a measure of their similarity.
+* `GeoJSON.LineString.frechetDistance(to:)`: Determines the [Fréchet distance](https://en.wikipedia.org/wiki/Fréchet_distance) between two line strings, which is a measure of their similarity.
+* `GeoJSON.GeometryObject(splittingWhenCrossingAntiMeridian:)`: Breaks up a LineString or Polygon into two when crossing the anti-meridian.
 
 ## CLI
 
