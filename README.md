@@ -8,14 +8,14 @@ This package provides various geospatial extensions for [GeoJSONKit](https://git
 
 ## Requirements
 
-GeoJSONKitTurf requires Xcode 12.x and supports the following minimum deployment targets:
+GeoJSONKitTurf requires Xcode 14.x and supports the following minimum deployment targets:
 
-* iOS 10.0 and above
-* macOS 10.12 (Sierra) and above
-* tvOS 10.0 and above
-* watchOS 3.0 and above
+- iOS 15 and above
+- macOS 12 and above
+- tvOS 15 and above
+- watchOS 8.0 and above
 
-It's also compatible with Linux (and possibly other platforms), as long as you have [Swift](https://swift.org/download/) 5.3 (or above) installed.
+It's also compatible with Linux (and possibly other platforms), as long as you have [Swift](https://swift.org/download/) 5.7 (or above) installed.
 
 ## Installation
 
@@ -27,7 +27,7 @@ To install GeoJSONKitTurf using the [Swift Package Manager](https://swift.org/pa
 .package(name: "GeoJSONKitTurf", url: "https://github.com/maparoni/geojsonkit-turf", from: "0.1.0")
 ```
 
-Then use: 
+Then use:
 
 ```swift
 import GeoJSONKitTurf
@@ -42,13 +42,14 @@ Turf.js | GeoJSONKit-Turf
 ----|----
 [turf-along](https://github.com/Turfjs/turf/tree/master/packages/turf-along/) | `GeoJSON.LineString.coordinateFromStart(distance:)`
 [turf-area](https://github.com/Turfjs/turf/blob/master/packages/turf-area/) | `GeoJSON.Polygon.area`
+[turf-bbox-clip](https://turfjs.org/docs/#bboxClip) | `GeoJSON.Polygon.clip(to:)`
 [turf-bearing](https://turfjs.org/docs/#bearing) | `GeoJSON.Position.direction(to:)`<br/> `RadianCoordinate2D.direction(to:)`
 [turf-bezier-spline](https://github.com/Turfjs/turf/tree/master/packages/turf-bezier-spline/) | `GeoJSON.LineString.bezier(resolution:sharpness:)`
-[turf-boolean-point-in-polygon](https://github.com/Turfjs/turf/tree/master/packages/turf-boolean-point-in-polygon) | `GeoJSON.Polygon.contains(_:ignoreBoundary:)`
+[turf-boolean-point-in-polygon](https://github.com/Turfjs/turf/tree/master/packages/turf-boolean-point-in-polygon) | `GeoJSON.Polygon.contains(_:)`
 [turf-center](http://turfjs.org/docs/#center) | `GeoJSON.Geometry.center()` |
 [turf-center-of-mass](http://turfjs.org/docs/#centerOfMass) | `GeoJSON.Geometry.centerOfMass()` |
 [turf-centroid](http://turfjs.org/docs/#centroid) | `GeoJSON.Geometry.centroid()` |
-[turf-circle](https://turfjs.org/docs/#circle) | `GeoJSON.Polygon(center:radius:vertices:)` |
+[turf-circle](https://turfjs.org/docs/#circle) | `GeoJSON.Polygon(center:radius:)` |
 [turf-convex](https://turfjs.org/docs/#convex) | `GeoJSON.convexHull()`<br/>`Collection<GeoJSON.Position>.convexHull()` |
 [turf-destination](https://github.com/Turfjs/turf/tree/master/packages/turf-destination/) | `GeoJSON.Position.coordinate(at:facing:)`<br/> `RadianCoordinate2D.coordinate(at:facing:)`
 [turf-distance](https://github.com/Turfjs/turf/tree/master/packages/turf-distance/) | `GeoJSON.Position.distance(to:)`<br/>`RadianCoordinate2D.distance(to:)`
@@ -86,6 +87,7 @@ First clone or download the repository, then run this:
 swift build -c release
 sudo cp .build/release/geokitten /usr/local/bin/geokitten
 ```
+
 </details>
 
 <details>
@@ -96,4 +98,5 @@ mint install maparoni/GeoJSONKit-Turf@main
 ```
 
 If you get a permissions error, check [this Mint issue](https://github.com/yonaskolb/Mint/issues/188).
+
 </details>

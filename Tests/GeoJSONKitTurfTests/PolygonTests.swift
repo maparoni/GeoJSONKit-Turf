@@ -605,4 +605,61 @@ class PolygonTests: XCTestCase {
       
     }
   }
+  
+  func testClip() throws {
+    try Fixture.fixtures(folder: "bbox-clip") { (name: String, input: GeoJSON, expected: GeoJSON) in
+      guard
+        case .featureCollection(let features) = input.object,
+        let inputFeature = features.first,
+        case .single(.polygon(let polygon)) = inputFeature.geometry,
+        let bboxFeature = features.last
+      else {
+        return XCTFail("Unexpected input")
+      }
+      
+      let bboxPositions = bboxFeature.geometry.positions
+      let actualPolygon = polygon.clip(to: .init(positions: bboxPositions))
+      let actual = GeoJSON(features: [
+        inputFeature.colorized(color: "#080"),
+        .init(geometry: .single(.polygon(actualPolygon))).colorized(color: "#F00"),
+        bboxFeature.colorized(color: "#00F", width: 3),
+      ])
+
+      if actual != expected {
+        // Give it another chance on the data-level, too
+        do {
+          var options: JSONSerialization.WritingOptions = [.prettyPrinted]
+          if #available(iOS 11.0, OSX 10.13, *) {
+            options.insert(.sortedKeys)
+          }
+          let newData = try actual.toData(options: options)
+          let oldData = try expected.toData(options: options)
+          if newData != oldData {
+            if true {
+              try Self.save(newData, filename: "out_actual", extension: "geojson")
+              try Self.save(oldData, filename: "out_expected", extension: "geojson")
+            }
+            XCTFail("Fixture check failed for \(name)!")
+          }
+          
+        } catch {
+          XCTFail("Fixture check failed for \(name)! Also: Generating JSON failed with: \(error)")
+        }
+      }
+      
+    }
+  }
+}
+
+extension GeoJSON.Feature {
+  func colorized(color: String = "#F00", width: Int = 6) -> GeoJSON.Feature {
+    var updated = self
+    updated.properties = [
+      "stroke": color,
+      "fill": color,
+      "stroke-width": width,
+      "fill-opacity": 0.1,
+    ]
+    return updated
+  }
 }
