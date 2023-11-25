@@ -98,6 +98,7 @@ extension GeoJSON.Geometry {
       return polygon.nearestPoint(to: position)
     }
   }
+
 }
 
 extension GeoJSON.GeometryObject {
@@ -117,6 +118,89 @@ extension GeoJSON.GeometryObject {
       return geometries.contains(where: { $0.contains(coordinate, ignoreBoundary: ignoreBoundary, checkBoundingBox: checkBoundingBox) })
     case .collection(let objects):
       return objects.contains(where: { $0.contains(coordinate, ignoreBoundary: ignoreBoundary, checkBoundingBox: checkBoundingBox) })
+    }
+  }
+
+}
+
+// MARK: - Anti-meridian safety
+
+extension GeoJSON.Geometry {
+  
+  func breakUpIfNecessary() -> [GeoJSON.Geometry] {
+    let bbox = GeoJSON.BoundingBox(positions: positions, allowSpanningAntimeridian: true)
+    guard bbox.spansAntimeridian else {
+      return [self]
+    }
+    
+    let normalized = self.wrapped(min: 0, max: 360)
+    
+    // Western-most point to anti-meridian
+    // No need to wrap, as already positive
+    let easterlyBox = GeoJSON.BoundingBox(positions: [
+      .init(latitude: bbox.northEasterlyLatitude, longitude: 180),
+      .init(latitude: bbox.southWesterlyLatitude, longitude: bbox.southWesterlyLongitude)
+    ])
+    
+    // Anti-meridian to eastern-mode point
+    // This needs to be wrapped sa the clipping doesn't work otherwise
+    let westerlyBox = GeoJSON.BoundingBox(positions: [
+      .init(latitude: bbox.northEasterlyLatitude, longitude: bbox.northEasterlyLongitude.wrap(min: 0, max: 360)),
+      .init(latitude: bbox.southWesterlyLatitude, longitude: 180)
+    ])
+    
+    let easterly = normalized.clipped(to: easterlyBox)
+    let westerly = normalized.clipped(to: westerlyBox)
+    return [
+      easterly,
+      westerly.wrapped(min: -180, max: 180),
+    ]
+  }
+  
+  private func clipped(to bbox: GeoJSON.BoundingBox) -> GeoJSON.Geometry {
+    switch self {
+    case .point:
+      return self
+    case .lineString(let line):
+      return .lineString(line.clipped(to: bbox))
+    case .polygon(let polygon):
+      return .polygon(polygon.clipped(to: bbox))
+    }
+  }
+  
+  private func wrapped(min: GeoJSON.Degrees, max: GeoJSON.Degrees) -> GeoJSON.Geometry {
+    switch self {
+    case .point:
+      return self
+      
+    case .lineString(let line):
+      let normalized = line.positions.map {
+        GeoJSON.Position(latitude: $0.latitude, longitude: $0.longitude.wrap(min: min, max: max))
+      }
+      return .lineString(.init(positions: normalized))
+
+    case .polygon(let polygon):
+      let normalized = polygon.exterior.positions.map {
+        GeoJSON.Position(latitude: $0.latitude, longitude: $0.longitude.wrap(min: min, max: max))
+      }
+      return .polygon(.init(exterior: .init(positions: normalized)))
+    }
+  }
+}
+
+
+extension GeoJSON.GeometryObject {
+  
+  /// Checks the provided geometry, if it crosses the anti-meridian. If it doesn't, it's returned as
+  /// a `.single`, otherwise it's broken up into two and returned as a `.multi`.
+  ///
+  /// - Parameter candidate: A geometry, which might cross the anti-meridian
+  public init(splittingWhenCrossingAntiMeridian candidate: GeoJSON.Geometry) {
+    let components = candidate.breakUpIfNecessary()
+    if components.count == 1, let only = components.first {
+      self = .single(only)
+    } else {
+      self = .multi(components)
     }
   }
 }

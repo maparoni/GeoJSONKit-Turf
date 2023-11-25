@@ -4,7 +4,7 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmaparoni%2FGeoJSONKit-Turf%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/maparoni/GeoJSONKit-Turf)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmaparoni%2FGeoJSONKit-Turf%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/maparoni/GeoJSONKit-Turf)
 
-This package provides various geospatial extensions for [GeoJSONKit](https://github.com/maparoni/geojsonkit). It is a fork of [turf-swift](https://github.com/mapbox/turf-swift.git), which is ported from [Turf.js](https://github.com/Turfjs/turf/).
+This package provides various geospatial extensions for [GeoJSONKit](https://github.com/maparoni/geojsonkit). It is a fork of [turf-swift](https://github.com/mapbox/turf-swift.git), which itself is a partial Swift-port of [Turf.js](https://github.com/Turfjs/turf/).
 
 ## Requirements
 
@@ -13,6 +13,7 @@ GeoJSONKitTurf requires Xcode 14.x and supports the following minimum deployment
 - iOS 15 and above
 - macOS 12 and above
 - tvOS 15 and above
+- visionOS 1.0 and above
 - watchOS 8.0 and above
 
 It's also compatible with Linux (and possibly other platforms), as long as you have [Swift](https://swift.org/download/) 5.7 (or above) installed.
@@ -24,7 +25,7 @@ It's also compatible with Linux (and possibly other platforms), as long as you h
 To install GeoJSONKitTurf using the [Swift Package Manager](https://swift.org/package-manager/), add the following package to the `dependencies` in your Package.swift file:
 
 ```swift
-.package(name: "GeoJSONKitTurf", url: "https://github.com/maparoni/geojsonkit-turf", from: "0.1.0")
+.package(name: "GeoJSONKitTurf", url: "https://github.com/maparoni/geojsonkit-turf", from: "0.3.0")
 ```
 
 Then use:
@@ -42,7 +43,7 @@ Turf.js | GeoJSONKit-Turf
 ----|----
 [turf-along](https://github.com/Turfjs/turf/tree/master/packages/turf-along/) | `GeoJSON.LineString.coordinateFromStart(distance:)`
 [turf-area](https://github.com/Turfjs/turf/blob/master/packages/turf-area/) | `GeoJSON.Polygon.area`
-[turf-bbox-clip](https://turfjs.org/docs/#bboxClip) | `GeoJSON.Polygon.clip(to:)`
+[turf-bbox-clip](https://turfjs.org/docs/#bboxClip) | `GeoJSON.LineString.clipped(to:)`<br/>`GeoJSON.Polygon.clipped(to:)`
 [turf-bearing](https://turfjs.org/docs/#bearing) | `GeoJSON.Position.direction(to:)`<br/> `RadianCoordinate2D.direction(to:)`
 [turf-bezier-spline](https://github.com/Turfjs/turf/tree/master/packages/turf-bezier-spline/) | `GeoJSON.LineString.bezier(resolution:sharpness:)`
 [turf-boolean-point-in-polygon](https://github.com/Turfjs/turf/tree/master/packages/turf-boolean-point-in-polygon) | `GeoJSON.Polygon.contains(_:)`
@@ -57,6 +58,7 @@ Turf.js | GeoJSONKit-Turf
 [turf-helpers#radiansToDegrees](https://github.com/Turfjs/turf/tree/master/packages/turf-helpers/#radiansToDegrees) | `GeoJSON.DegreesRadians.toDegrees()`
 [turf-helpers#convertLength](https://github.com/Turfjs/turf/tree/master/packages/turf-helpers#convertlength)<br/>[turf-helpers#convertArea](https://github.com/Turfjs/turf/tree/master/packages/turf-helpers#convertarea) | `Measurement.converted(to:)`
 [turf-length](https://github.com/Turfjs/turf/tree/master/packages/turf-length/) | `GeoJSON.LineString.distance(from:to:)`
+[turf-line-chunk](http://turfjs.org/docs/#lineChunk) | `GeoJSON.LineString.chunked(length:)`<br/>`GeoJSON.Polygon.LinearRing.chunked(length:)` |
 [turf-line-intersect](https://github.com/Turfjs/turf/tree/master/packages/turf-line-intersect/) | `GeoJSON.LineString.intersection(with:)`
 [turf-line-slice](https://github.com/Turfjs/turf/tree/master/packages/turf-line-slice/) | `GeoJSON.LineString.sliced(from:to:)`
 [turf-line-slice-along](https://github.com/Turfjs/turf/tree/master/packages/turf-line-slice-along/) | `GeoJSON.LineString.trimmed(from:distance:)`<br/>`GeoJSON.LineString.trimmed(from:to:)` 
@@ -66,8 +68,13 @@ Turf.js | GeoJSONKit-Turf
 [turf-polygon-smooth](https://github.com/Turfjs/turf/tree/master/packages/turf-polygon-smooth) | `GeoJSON.Polygon.smooth(iterations:)`
 [turf-union](https://github.com/Turfjs/turf/tree/master/packages/turf-union) | Not provided, but see [ASPolygonKit](https://github.com/nighthawk/ASPolygonKit) 
 [turf-simplify](https://github.com/Turfjs/turf/tree/master/packages/turf-simplify) | `GeoJSON.simplify(options:)`
-— | `GeoJSON.Direction.difference(from:)`
-— | `GeoJSON.Direction.wrap(min:max:)`
+
+Additionally, it adds the following features, which do not have a direct equivalent in turf.js:
+
+* `GeoJSON.Direction.difference(from:)`
+* `GeoJSON.Direction.wrap(min:max:)`
+* `GeoJSON.LineString.frechetDistance(to:)`: Determines the [Fréchet distance](https://en.wikipedia.org/wiki/Fréchet_distance) between two line strings, which is a measure of their similarity.
+* `GeoJSON.GeometryObject(splittingWhenCrossingAntiMeridian:)`: Breaks up a LineString or Polygon into two when crossing the anti-meridian.
 
 ## CLI
 

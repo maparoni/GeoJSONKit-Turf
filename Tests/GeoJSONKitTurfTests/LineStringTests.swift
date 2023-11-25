@@ -205,6 +205,110 @@ class LineStringTests: XCTestCase {
                       indexLineString.coordinates[3].distance(to: indexLineString.coordinates.first!))
   }
   
+  func testChunk() throws {
+    // Adapted from https://github.com/Turfjs/turf/blob/master/packages/turf-line-chunk/test.js
+    let input = try GeoJSON(geoJSONString: """
+      {
+        "type": "LineString",
+        "coordinates": [
+          [-86.28524780273438, 40.250184183819854],
+          [-85.98587036132812, 40.17887331434696],
+          [-85.97213745117188, 40.08857859823707],
+          [-85.77987670898438, 40.15578608609647]
+        ]
+      }
+      """)
+    
+    let segmented = try GeoJSON(geoJSONString: """
+      {
+        "type": "LineString",
+        "coordinates": [
+          [-86.2852, 40.2501],
+          [-86.1947, 40.2287],
+          [-86.104, 40.2071],
+          [-86.0138, 40.185],
+          [-85.985, 40.1788],
+          [-85.9783, 40.1292],
+          [-85.9721, 40.0885],
+          [-85.9347, 40.1016],
+          [-85.8487, 40.1317],
+          [-85.7798, 40.155]
+        ]
+      }
+      """)
+    
+    guard 
+      case .geometry(.single(.lineString(let lineIn))) = input.object,
+      case .geometry(.single(.lineString(let lineOut))) = segmented.object
+    else { return XCTFail() }
+    
+    // Chunked by 5 miles should split it into smaller segments
+    let fiveMiles = 8046.72
+    let chunked = lineIn.chunked(length: fiveMiles)
+    XCTAssertEqual(chunked.positions.count, lineOut.positions.count)
+    for (offset, pair) in zip(lineOut.positions, chunked.positions).enumerated() {
+      XCTAssertEqual(pair.0.latitude, pair.1.latitude, accuracy: 0.001, "Failure at: \(offset)")
+      XCTAssertEqual(pair.0.longitude, pair.1.longitude, accuracy: 0.001, "Failure at: \(offset)")
+    }
+
+    // Chunked by 50 miles should stay the same
+    XCTAssertEqual(lineIn.chunked(length: 10 * fiveMiles), lineIn)
+  }
+  
+  func testChunkCrossingAntiMeridian() throws {
+    let input = try GeoJSON(geoJSONString: """
+      {
+        "type": "LineString",
+        "coordinates": [
+          [151.21, -33.86],
+          [-122.40, 37.78]
+        ]
+      }
+      """)
+    
+    let segmented = try GeoJSON(geoJSONString: """
+      {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [151.21, -33.86],
+            [159.66614, -28.51214],
+            [167.27209, -22.69315],
+            [174.24093, -16.54493],
+            [180.0, -10.93165]
+          ],
+          [
+            [-180.0, -10.93165],
+            [-179.22884, -10.18002],
+            [-172.95704, -3.69086],
+            [-166.776739, 2.84170],
+            [-160.52609, 9.34092],
+            [-154.03934, 15.72689],
+            [-147.138400, 21.90916],
+            [-139.627215, 27.77830],
+            [-131.293853, 33.19675],
+            [-122.40, 37.78]
+          ]
+        ]
+      }
+      """)
+    
+    guard
+      case .geometry(.single(.lineString(let lineIn))) = input.object,
+      case .geometry(let geoOut) = segmented.object
+    else { return XCTFail() }
+    
+    let chunked = GeoJSON.GeometryObject(splittingWhenCrossingAntiMeridian:  .lineString(lineIn.chunked(length: 1_000_000)))
+    
+    XCTAssertEqual(chunked.positions.count, geoOut.positions.count)
+    
+    for (offset, pair) in zip(geoOut.positions, chunked.positions).enumerated() {
+      XCTAssertEqual(pair.0.latitude, pair.1.latitude, accuracy: 0.001, "Failure at: \(offset)")
+      XCTAssertEqual(pair.0.longitude, pair.1.longitude, accuracy: 0.001, "Failure at: \(offset)")
+    }
+
+  }
+  
   func testCoordinateFromStart() {
     // Ported from https://github.com/Turfjs/turf/blob/142e137ce0c758e2825a260ab32b24db0aa19439/packages/turf-along/test.js
     

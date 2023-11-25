@@ -618,7 +618,7 @@ class PolygonTests: XCTestCase {
       }
       
       let bboxPositions = bboxFeature.geometry.positions
-      let actualPolygon = polygon.clip(to: .init(positions: bboxPositions))
+      let actualPolygon = polygon.clipped(to: .init(positions: bboxPositions))
       let actual = GeoJSON(features: [
         inputFeature.colorized(color: "#080"),
         .init(geometry: .single(.polygon(actualPolygon))).colorized(color: "#F00"),
