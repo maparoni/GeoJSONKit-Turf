@@ -4,7 +4,7 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmaparoni%2FGeoJSONKit-Turf%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/maparoni/GeoJSONKit-Turf)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmaparoni%2FGeoJSONKit-Turf%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/maparoni/GeoJSONKit-Turf)
 
-This package provides various geospatial extensions for [GeoJSONKit](https://github.com/maparoni/geojsonkit). It is a fork of [turf-swift](https://github.com/mapbox/turf-swift.git), which is ported from [Turf.js](https://github.com/Turfjs/turf/).
+This package provides various geospatial extensions for [GeoJSONKit](https://github.com/maparoni/geojsonkit). It is a fork of [turf-swift](https://github.com/mapbox/turf-swift.git), which itself is a partial Swift-port of [Turf.js](https://github.com/Turfjs/turf/).
 
 ## Requirements
 
@@ -13,6 +13,7 @@ GeoJSONKitTurf requires Xcode 14.x and supports the following minimum deployment
 - iOS 15 and above
 - macOS 12 and above
 - tvOS 15 and above
+- visionOS 1.0 and above
 - watchOS 8.0 and above
 
 It's also compatible with Linux (and possibly other platforms), as long as you have [Swift](https://swift.org/download/) 5.7 (or above) installed.
@@ -24,7 +25,7 @@ It's also compatible with Linux (and possibly other platforms), as long as you h
 To install GeoJSONKitTurf using the [Swift Package Manager](https://swift.org/package-manager/), add the following package to the `dependencies` in your Package.swift file:
 
 ```swift
-.package(name: "GeoJSONKitTurf", url: "https://github.com/maparoni/geojsonkit-turf", from: "0.1.0")
+.package(name: "GeoJSONKitTurf", url: "https://github.com/maparoni/geojsonkit-turf", from: "0.3.0")
 ```
 
 Then use:
@@ -67,8 +68,12 @@ Turf.js | GeoJSONKit-Turf
 [turf-polygon-smooth](https://github.com/Turfjs/turf/tree/master/packages/turf-polygon-smooth) | `GeoJSON.Polygon.smooth(iterations:)`
 [turf-union](https://github.com/Turfjs/turf/tree/master/packages/turf-union) | Not provided, but see [ASPolygonKit](https://github.com/nighthawk/ASPolygonKit) 
 [turf-simplify](https://github.com/Turfjs/turf/tree/master/packages/turf-simplify) | `GeoJSON.simplify(options:)`
-— | `GeoJSON.Direction.difference(from:)`
-— | `GeoJSON.Direction.wrap(min:max:)`
+
+Additionally, it adds the following features, which do not have a direct equivalent in turf.js:
+
+* `GeoJSON.Direction.difference(from:)`
+* `GeoJSON.Direction.wrap(min:max:)`
+* `GeoJSON.LineString.frechetDistance(to:)`: Determines [Fréchet Distance](https://en.wikipedia.org/wiki/Fréchet_distance) between two line strings, which is a measure of their similarity.
 
 ## CLI
 

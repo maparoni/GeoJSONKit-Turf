@@ -201,6 +201,12 @@ extension GeoJSON.LineString {
   
   /// Divides a ``GeoJSON.LineString`` into chunks of a specified length.
   /// If the line is shorter than the segment length then the original line is returned.
+  /// 
+  /// Adopted This function is roughly equivalent to the [turf-line-chunk](https://turfjs.org/docs/#lineChunk) package of Turf.js ([source code](https://github.com/Turfjs/turf/tree/master/packages/turf-line-chunk/)). However, it returns another line string
+  /// rather than a feature collection.
+  ///
+  /// - Parameter length: How long to make each segment, in metres.
+  /// - Returns: Line string with positions repeating as requested.
   public func chunked(length: GeoJSON.Distance) -> GeoJSON.LineString {
     return .init(positions: GeoJSON.LineString.sliceLineSegments(positions, length: length))
   }
