@@ -58,7 +58,7 @@ extension GeoJSON.BoundingBox {
     self.init(positions: geometries.flatMap(\.positions), allowSpanningAntimeridian: allowSpanningAntimeridian)
   }
   
-  mutating func append(_ position: GeoJSON.Position, allowSpanningAntimeridian: Bool = true) {
+  public mutating func append(_ position: GeoJSON.Position, allowSpanningAntimeridian: Bool = true) {
     guard !contains(position) else { return }
     let north = max(northEasterlyLatitude, position.latitude)
     let south = min(southWesterlyLatitude, position.latitude)
