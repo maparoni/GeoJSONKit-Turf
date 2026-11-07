@@ -76,6 +76,7 @@ Additionally, it adds the following features, which do not have a direct equival
 * `GeoJSON.Direction.wrap(min:max:)`
 * `GeoJSON.LineString.frechetDistance(to:)`: Determines the [Fréchet distance](https://en.wikipedia.org/wiki/Fréchet_distance) between two line strings, which is a measure of their similarity.
 * `GeoJSON.GeometryObject(splittingWhenCrossingAntiMeridian:)`: Breaks up a LineString or Polygon into two when crossing the anti-meridian.
+* `GeoJSON.Polygon.triangles(maxEdgeDegrees:)`: Splits a polygon into triangles with no edge longer than a limit, for drawing a fill by projecting the triangles' corners.
 
 ## CLI
 
