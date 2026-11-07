@@ -5,7 +5,7 @@
 //  Created by Adrian Schönig on 14/2/2025.
 //
 
-#if canImport(Testing) && swift(>=6)
+#if canImport(Testing) && compiler(>=6)
 import Testing
 
 import GeoJSONKit

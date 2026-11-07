@@ -66,6 +66,7 @@ Turf.js | GeoJSONKit-Turf
 [turf-nearest-point-on-line](https://github.com/Turfjs/turf/tree/master/packages/turf-nearest-point-on-line/) | `GeoJSON.LineString.closestCoordinate(to:)`
 [turf-point-on-feature](https://github.com/Turfjs/turf/tree/master/packages/turf-point-on-feature/) | `GeoJSON.Geometry.nearestPoint(to:)`<br/>`GeoJSON.Polygon.nearestPoint(to:)`
 [turf-polygon-smooth](https://github.com/Turfjs/turf/tree/master/packages/turf-polygon-smooth) | `GeoJSON.Polygon.smooth(iterations:)`
+[turf-tesselate](https://turfjs.org/docs/#tesselate) | `GeoJSON.Polygon.triangleIndices()`
 [turf-union](https://github.com/Turfjs/turf/tree/master/packages/turf-union) | Not provided, but see [ASPolygonKit](https://github.com/nighthawk/ASPolygonKit) 
 [turf-simplify](https://github.com/Turfjs/turf/tree/master/packages/turf-simplify) | `GeoJSON.simplify(options:)`
 
