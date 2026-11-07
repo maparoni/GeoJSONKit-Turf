@@ -116,6 +116,38 @@ struct RefinedTrianglesTests {
     #expect(triangles.count == 400)
   }
 
+  static let wrappingCases: [(String, [[(x: Double, y: Double)]], Double)] = [
+    ("across the antimeridian", [[(170, -10), (-170, -10), (-170, 10), (170, 10), (170, -10)]], 400),
+    ("a hole across the antimeridian", [[(160, -20), (-160, -20), (-160, 20), (160, 20), (160, -20)], [(170, -10), (170, 10), (-170, 10), (-170, -10), (170, -10)]], 1200),
+    ("a hole a turn away", [[(170, -10), (190, -10), (190, 10), (170, 10), (170, -10)], [(-185, -5), (-185, 5), (-175, 5), (-175, -5), (-185, -5)]], 300),
+    ("around the south pole", [stride(from: -180.0, through: 180.0, by: 20).map { ($0, -70) }], 7200),
+    ("around the north pole", [stride(from: 180.0, through: -180.0, by: -20).map { ($0, 70) }], 7200),
+    // It starts on a peninsula with a bay to its south, as Antarctica's ring does, which
+    // can't go straight to the pole.
+    ("around the south pole, from over a bay", [[(0, -60), (20, -70)] + stride(from: 60.0, to: 340, by: 30).map { ($0, -70) } + [(-20, -70), (-10, -85), (5, -80), (0, -60)]], 7037.5),
+    ("to the south pole and back", [stride(from: -180.0, through: 180.0, by: 20).map { ($0, -70) } + [(180, -90), (-180, -90), (-180, -70)]], 7200),
+    ("neither", [[(10, 10), (40, 10), (40, 30), (10, 30), (10, 10)]], 600),
+  ]
+
+  @Test("Unwrapped rings add up to the polygon", arguments: wrappingCases)
+  func unwrapped(name: String, rings: [[(x: Double, y: Double)]], area: Double) {
+    let unwrapped = Self.polygon(rings).unwrapped()
+    for ring in [unwrapped.exterior] + unwrapped.interiors {
+      #expect(ring.positions.first == ring.positions.last)
+      for (from, to) in zip(ring.positions, ring.positions.dropFirst()) {
+        // Other than along a pole.
+        #expect(abs(to.longitude - from.longitude) <= 180 || (abs(from.latitude) == 90 && to.latitude == from.latitude))
+      }
+    }
+    let total = unwrapped.triangles(maxEdgeDegrees: 10).reduce(0.0) { $0 + Self.cross($1.a, $1.b, $1.c) / 2 }
+    #expect(abs(total - area) < 0.001 * area)
+  }
+
+  @Test func unwrappedKeepsWhatDoesNotWrap() {
+    let polygon = Self.polygon([[(10, 10), (40, 10), (40, 30), (10, 30), (10, 10)], [(15, 15), (15, 20), (20, 20), (20, 15), (15, 15)]])
+    #expect(polygon.unwrapped().positionsArray == polygon.positionsArray)
+  }
+
   @Test func tooFewCorners() {
     #expect(Self.polygon([[(0, 0), (1, 1), (0, 0)]]).triangles(maxEdgeDegrees: 1).isEmpty)
     #expect(Self.polygon([[]]).triangles(maxEdgeDegrees: 1).isEmpty)

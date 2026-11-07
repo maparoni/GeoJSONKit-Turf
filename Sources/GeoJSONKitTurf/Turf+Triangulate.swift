@@ -213,3 +213,88 @@ extension GeoJSON.Polygon {
     return aSquared * (bdx * cdy - cdx * bdy) - bSquared * (adx * cdy - cdx * ady) + cSquared * (adx * bdy - bdx * ady)
   }
 }
+
+extension GeoJSON.Polygon {
+  /// The polygon with rings that run on past the antimeridian instead of jumping across it,
+  /// which is what ``triangles(maxEdgeDegrees:)`` and ``triangleIndices()`` need, as they take
+  /// longitude and latitude as flat coordinates.
+  ///
+  /// Each position's longitude is then less than 180 degrees from the one before. A ring that
+  /// goes around a pole ends a turn away from where it started, so it's taken along that pole
+  /// to close it. Interiors are moved by whole turns to where the exterior is. An edge along
+  /// the antimeridian and back again, as a ring that's split there has, is left out, and so
+  /// is a position that's the same as the one before.
+  ///
+  /// - Returns: The polygon as it is where none of its rings cross the antimeridian.
+  public func unwrapped() -> GeoJSON.Polygon {
+    let exterior = Self.unwrap(exterior.positions)
+    guard exterior.count >= 4 else { return self }
+    let middle = Self.middleLongitude(of: exterior)
+    let interiors = interiors.map { interior -> GeoJSON.Polygon.LinearRing in
+      let hole = Self.unwrap(interior.positions)
+      guard !hole.isEmpty else { return interior }
+      // A ring on its own starts anywhere, and could be a turn away from the exterior.
+      let turns = ((middle - Self.middleLongitude(of: hole)) / 360).rounded()
+      return .init(positions: hole.map { GeoJSON.Position(latitude: $0.latitude, longitude: $0.longitude + turns * 360, altitude: $0.altitude) })
+    }
+    return GeoJSON.Polygon(exterior: .init(positions: exterior), interiors: interiors)
+  }
+
+  private static func middleLongitude(of positions: [GeoJSON.Position]) -> Double {
+    let longitudes = positions.map(\.longitude)
+    return (longitudes.min()! + longitudes.max()!) / 2
+  }
+
+  /// The ring's positions, closed, or none if it has fewer than three corners.
+  private static func unwrap(_ ring: [GeoJSON.Position]) -> [GeoJSON.Position] {
+    var positions = ring
+    if positions.count > 1, positions.first?.latitude == positions.last?.latitude, positions.first?.longitude == positions.last?.longitude {
+      positions.removeLast()
+    }
+    guard positions.count >= 3 else { return [] }
+
+    var corners: [GeoJSON.Position] = []
+    func add(_ corner: GeoJSON.Position) {
+      if let last = corners.last, last.latitude == corner.latitude, last.longitude == corner.longitude { return }
+      // An edge along the antimeridian and back again, as a ring that's split there has,
+      // once they're on top of each other.
+      if corners.count >= 2, corners[corners.count - 2].latitude == corner.latitude, corners[corners.count - 2].longitude == corner.longitude {
+        corners.removeLast()
+      } else {
+        corners.append(corner)
+      }
+    }
+    let start = positions[0].longitude
+    var longitude = start
+    for (index, position) in positions.enumerated() {
+      add(GeoJSON.Position(latitude: position.latitude, longitude: longitude, altitude: position.altitude))
+      var delta = positions[(index + 1) % positions.count].longitude - position.longitude
+      if delta > 180 { delta -= 360 }
+      if delta < -180 { delta += 360 }
+      longitude += delta
+    }
+    let turn = longitude - start
+    if abs(turn) > 180 {
+      let south = positions.reduce(0) { $0 + $1.latitude } < 0
+      // Straight to the pole from the corner that's closest to it, as from anywhere else
+      // that could run across the ring itself.
+      let closest = corners.indices.min { south ? corners[$0].latitude < corners[$1].latitude : corners[$0].latitude > corners[$1].latitude } ?? 0
+      let from = corners[closest]
+      func shifted(_ corner: GeoJSON.Position, latitude: Double? = nil) -> GeoJSON.Position {
+        GeoJSON.Position(latitude: latitude ?? corner.latitude, longitude: corner.longitude + turn, altitude: latitude == nil ? corner.altitude : nil)
+      }
+      let rotated = Array(corners[closest...]) + corners[..<closest].map { shifted($0) }
+      corners = []
+      rotated.forEach(add)
+      let pole = south ? -90.0 : 90.0
+      add(shifted(from))
+      add(shifted(from, latitude: pole))
+      add(GeoJSON.Position(latitude: pole, longitude: from.longitude))
+    }
+    if corners.count > 1, let first = corners.first, let last = corners.last, first.latitude == last.latitude, first.longitude == last.longitude {
+      corners.removeLast()
+    }
+    guard corners.count >= 3 else { return [] }
+    return corners + [corners[0]]
+  }
+}
